@@ -97,6 +97,9 @@ public class ToDoListServlet extends HttpServlet {
         myListObject.printList();
         List<ToDoBean> l = myListObject.getList();
 
+        //
+
+
         // put the list in a json
         JsonObjectBuilder jObjBuilder = Json.createObjectBuilder();
         JsonArrayBuilder jArrayBuilder = Json.createArrayBuilder();
