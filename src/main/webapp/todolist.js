@@ -3,6 +3,7 @@
  */
 
 function listTasks(tasks) {
+    alert("incep")
     var list = document.getElementById('listOfTasks').getElementsByTagName('ul')[0];
     var listHtml = '';
 
@@ -57,6 +58,6 @@ function addTask() {
     $.ajax({
         url: 'items?action=add&value='+toDoText
     }).done(function (response) {
-        location.href = "todolist.html";
+        location.href = "index.html";
     });
 }
