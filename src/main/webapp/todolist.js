@@ -44,4 +44,19 @@ function addTask() {
     }).done(function (response) {
         location.href = "todolist.html";
     });
+
+}
+
+function islogin() {
+    $.ajax({
+        url: 'items?action=seeLogin'
+    }).done(function (response) {
+        listLogin(response.keyError);
+    });
+}
+
+function listLogin(keyError) {
+    var elem = document.getElementById('login');
+
+    elem.innerHTML = keyError+'<a href="login.html">Login</a>';
 }

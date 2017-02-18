@@ -9,6 +9,8 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,19 +50,44 @@ public class ToDoListServlet extends HttpServlet {
         System.out.println("mytask list service called now.");
 
 
+
         HttpSession session = request.getSession(true);
-        String action = request.getParameter(ACTION);
 
+        String username=(String)session.getAttribute("username");
+        if(username==null) // nu esti logat
+        {
+            System.out.println("nu esti logat nene");
+            notLoginAction(request, response, true);
 
-        if (action != null && action.equals(LIST_ACTION)) {
-            listAction(request, response);
-        } else if (action != null && action.equals(ADD_ACTION)) {
-            addAction(request, response);
-        } else if (action != null && action.equals(DONE_ACTION)) {
-            doneAction(request, response);
+//            try {
+//                System.out.println("nu exista acest user in db, deci nu fac nimic ");
+//                String back = "/login.html";
+//                RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(back);
+//                dispatcher.forward(request, response);
+//            } catch (ServletException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
         }
+        else { // esti logat
+
+            String action = request.getParameter(ACTION);
 
 
+            if (action != null && action.equals(LIST_ACTION)) {
+                listAction(request, response);
+            } else if (action != null && action.equals(ADD_ACTION)) {
+                addAction(request, response);
+            } else if (action != null && action.equals(DONE_ACTION)) {
+                doneAction(request, response);
+            }
+            else if (action != null && action.equals("seeLogin")) {
+                notLoginAction(request, response, false);
+            }
+
+        }
     }
 
 
@@ -116,21 +143,25 @@ public class ToDoListServlet extends HttpServlet {
 
         String idS = request.getParameter(ID_TASK);
         int id = Integer.parseInt(idS);
-        MyListOfToDoMock myListObject = MyListOfToDoMock.getInstance();
 
-        myListObject.printList();
+        AccessTaskList atl = new AccessTaskList();
+        atl.markDone(id);
 
-
-        List<ToDoBean> l = myListObject.getList();
-        for (ListIterator<ToDoBean> iterator = l.listIterator(); iterator.hasNext(); ) {
-            ToDoBean element = iterator.next();
-
-            if (element.getId() == id) {
-                System.out.println("found it, now canceling");
-                element.setDone(true);
-                iterator.set(element);
-            }
-        }
+//        MyListOfToDoMock myListObject = MyListOfToDoMock.getInstance();
+//
+//        myListObject.printList();
+//
+//
+//        List<ToDoBean> l = myListObject.getList();
+//        for (ListIterator<ToDoBean> iterator = l.listIterator(); iterator.hasNext(); ) {
+//            ToDoBean element = iterator.next();
+//
+//            if (element.getId() == id) {
+//                System.out.println("found it, now canceling");
+//                element.setDone(true);
+//                iterator.set(element);
+//            }
+//        }
 
         System.out.println("i am done");
     }
@@ -146,8 +177,12 @@ public class ToDoListServlet extends HttpServlet {
 
         MyListOfToDoMock myListObject = MyListOfToDoMock.getInstance();
         myListObject.printList();
-
         myListObject.addItem(value);
+
+
+
+        AccessTaskList atl = new AccessTaskList();
+        atl.insertTaskList(value);
 
         System.out.println("now I am done");
 
@@ -166,4 +201,19 @@ public class ToDoListServlet extends HttpServlet {
         pr.write(jsonResponse);
         pr.close();
     }
+
+    private void notLoginAction(HttpServletRequest request, HttpServletResponse response, boolean notLogin)
+    {
+        String  jsonResponse;
+        if(notLogin)
+            jsonResponse = "{\"keyError\":\"You are not logged in. \"}";
+        else {
+            String username=(String)request.getSession().getAttribute("username");
+            System.out.println("username in verificare:"+username);
+            jsonResponse = "{\"keyError\":\"Hello my friend "+username+"\"}";
+        }
+        returnJsonResponse(response, jsonResponse.toString());
+        System.out.println("end list action");
+    }
+
 }
